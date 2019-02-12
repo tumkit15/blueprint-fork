@@ -20,6 +20,12 @@ export interface ITreeNode<T = {}> extends IProps {
     childNodes?: Array<ITreeNode<T>>;
 
     /**
+     * Whether this tree node is non-interactive. Enabling this prop will ignore
+     * mouse event handlers (in particular click, down, enter, leave).
+     */
+    disabled?: boolean;
+
+    /**
      * Whether the caret to expand/collapse a node should be shown.
      * If not specified, this will be true if the node has children and false otherwise.
      */
@@ -86,10 +92,11 @@ export class TreeNode<T = {}> extends React.Component<ITreeNodeProps<T>, {}> {
     }
 
     public render() {
-        const { children, className, icon, isExpanded, isSelected, label } = this.props;
+        const { children, className, disabled, icon, isExpanded, isSelected, label } = this.props;
         const classes = classNames(
             Classes.TREE_NODE,
             {
+                [Classes.DISABLED]: disabled,
                 [Classes.TREE_NODE_SELECTED]: isSelected,
                 [Classes.TREE_NODE_EXPANDED]: isExpanded,
             },
@@ -144,11 +151,17 @@ export class TreeNode<T = {}> extends React.Component<ITreeNodeProps<T>, {}> {
 
     private handleCaretClick = (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
-        const { isExpanded, onCollapse, onExpand } = this.props;
+        const { disabled, isExpanded, onCollapse, onExpand } = this.props;
+        if (disabled) {
+            return;
+        }
         safeInvoke(isExpanded ? onCollapse : onExpand, this, e);
     };
 
     private handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (this.props.disabled) {
+            return;
+        }
         safeInvoke(this.props.onClick, this, e);
     };
 
@@ -157,18 +170,30 @@ export class TreeNode<T = {}> extends React.Component<ITreeNodeProps<T>, {}> {
     };
 
     private handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (this.props.disabled) {
+            return;
+        }
         safeInvoke(this.props.onContextMenu, this, e);
     };
 
     private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (this.props.disabled) {
+            return;
+        }
         safeInvoke(this.props.onDoubleClick, this, e);
     };
 
     private handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (this.props.disabled) {
+            return;
+        }
         safeInvoke(this.props.onMouseEnter, this, e);
     };
 
     private handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (this.props.disabled) {
+            return;
+        }
         safeInvoke(this.props.onMouseLeave, this, e);
     };
 }
